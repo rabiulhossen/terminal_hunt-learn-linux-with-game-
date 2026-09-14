@@ -1,18 +1,36 @@
-import {useState, type KeyboardEvent} from "react";
+import { useState, type KeyboardEvent } from "react";
 
 function App() {
-
-  const [input,setInput] = useState("");
+  const [input, setInput] = useState("");
   const [output, setOutput] = useState<string[]>([]);
 
-  const handleCommand = (event: React.KeyboardEvent<HTMLInputElement>) =>{
-    if (event.key !== "Enter"){
-   return;
+  const handleCommand = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== "Enter") {
+      return;
     }
-    if(input === "ls") {
-      setOutput(["firstFile.txt", "gems.txt"])
+
+    const command = input.trim();
+
+    if (command === "ls") {
+      setOutput((previousOutput) => [
+        ...previousOutput,
+        "you@ship:~$ ls",
+        "firstFile.txt",
+        "gems.txt",
+      ]);
+    } else if (command === "clear") {
+      setOutput([]);
+    } else if (command !== "") {
+      setOutput((previousOutput) => [
+        ...previousOutput,
+        `you@ship:~$ ${command}`,
+        `Command not found: ${command}`,
+      ]);
     }
+
+    setInput("");
   };
+
   return (
     <main className="terminal">
       <h1>TREASURE.SYS</h1>
@@ -23,8 +41,8 @@ function App() {
         <p>Type "help" for available commands.</p>
 
         {output.map((line, index) => (
-  <p key={index}>{line}</p>
-))}
+          <p key={index}>{line}</p>
+        ))}
       </div>
 
       <div className="prompt">
@@ -37,6 +55,7 @@ function App() {
           autoFocus
         />
       </div>
+
       <p>Current command: {input}</p>
     </main>
   );
