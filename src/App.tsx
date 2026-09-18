@@ -1,97 +1,59 @@
 import { useState, type KeyboardEvent } from "react";
+import {getNode, filesystem} from "./game/filesystem";
 function App() {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState<string[]>([]);
   const [history, setHistory] = useState<string[]>([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
-
-
+  const [currentPath, setCurrentPath] = useState<string[]>([
+  "home",
+  "you",
+]);
 
   const handleCommand = (event: KeyboardEvent<HTMLInputElement>) => {
-  if (event.key === "ArrowUp") {
-    if (history.length === 0) {
+    if (event.key !== "Enter") {
       return;
     }
 
-    const newIndex =
-      historyIndex === -1
-        ? history.length - 1
-        : Math.max(historyIndex - 1, 0);
+const command = input.trim();
 
-    setHistoryIndex(newIndex);
-    setInput(history[newIndex]);
-
-    return;
-  }
-
-  if (event.key === "ArrowDown") {
-    if (historyIndex === -1) {
-      return;
-    }
-
-    const newIndex = historyIndex + 1;
-
-    if (newIndex >= history.length) {
-      setHistoryIndex(-1);
-      setInput("");
-      return;
-    }
-
-    setHistoryIndex(newIndex);
-    setInput(history[newIndex]);
-
-    return;
-  }
-
-  if (event.key !== "Enter") {
-    return;
-  }
-
-  const command = input.trim();
-
-
-    if (command !== "") {
-  setHistory((previousHistory) => [
-    ...previousHistory,
-    command,
-  ]);
-}
-
-    if (command === "ls") {
-      setOutput((previousOutput) => [
+if (command === "ls") {
+  setOutput((previousOutput) => [
         ...previousOutput,
         "you@ship:~$ ls",
         "firstFile.txt",
         "gems.txt",
       ]);
-    } else if (command === "clear") {
-      setOutput([]);
-    } else if (command !== "") {
-      setOutput((previousOutput) => [
-        ...previousOutput,
-        `you@ship:~$ ${command}`,
-        `Command not found: ${command}`,
-      ]);
-    }
+} else if (command === "pwd") {
+  setOutput((previousOutput) => [
+    ...previousOutput,
+    `you@ship:~$ ${command}`,
+    "/" + currentPath.join("/"),
+  ]);
+} else if (command === "clear") {
+  setOutput([]);
+} else if (command !== "") {
+  setOutput((previousOutput) => [
+    ...previousOutput,
+    `you@ship:~$ ${command}`,
+    `Command not found: ${command}`,
+  ]);
 
-  if (command !== "") {
-    setHistory((previousHistory) => [
-      ...previousHistory,
-      command,
-    ]);
-  }
+  
+}
 
-  setHistoryIndex(-1);
-  setInput("");
-};
+else if (command.startsWith("cd ")) {
+  const destination = command.slice(3).trim();
 
+  const newPath = [...currentPath, destination];
 
-// Render the terminal interface
+console.log(newPath);
+}
 
+ 
 
-
-
-
+    setInput("");
+  };
+console.log(filesystem);
   return (
     <main className="terminal">
       <h1>TREASURE.SYS</h1>
