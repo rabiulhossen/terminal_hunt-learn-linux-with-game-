@@ -1,15 +1,61 @@
 import { useState, type KeyboardEvent } from "react";
-
 function App() {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState<string[]>([]);
+  const [history, setHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+
+
 
   const handleCommand = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key !== "Enter") {
+  if (event.key === "ArrowUp") {
+    if (history.length === 0) {
       return;
     }
 
-    const command = input.trim();
+    const newIndex =
+      historyIndex === -1
+        ? history.length - 1
+        : Math.max(historyIndex - 1, 0);
+
+    setHistoryIndex(newIndex);
+    setInput(history[newIndex]);
+
+    return;
+  }
+
+  if (event.key === "ArrowDown") {
+    if (historyIndex === -1) {
+      return;
+    }
+
+    const newIndex = historyIndex + 1;
+
+    if (newIndex >= history.length) {
+      setHistoryIndex(-1);
+      setInput("");
+      return;
+    }
+
+    setHistoryIndex(newIndex);
+    setInput(history[newIndex]);
+
+    return;
+  }
+
+  if (event.key !== "Enter") {
+    return;
+  }
+
+  const command = input.trim();
+
+
+    if (command !== "") {
+  setHistory((previousHistory) => [
+    ...previousHistory,
+    command,
+  ]);
+}
 
     if (command === "ls") {
       setOutput((previousOutput) => [
@@ -28,8 +74,23 @@ function App() {
       ]);
     }
 
-    setInput("");
-  };
+  if (command !== "") {
+    setHistory((previousHistory) => [
+      ...previousHistory,
+      command,
+    ]);
+  }
+
+  setHistoryIndex(-1);
+  setInput("");
+};
+
+
+// Render the terminal interface
+
+
+
+
 
   return (
     <main className="terminal">
