@@ -1,5 +1,5 @@
 import { useState, type KeyboardEvent } from "react";
-import {getNode, filesystem} from "./game/filesystem";
+import {getNode, filesystem, isDirectory} from "./game/filesystem";
 function App() {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState<string[]>([]);
@@ -29,7 +29,28 @@ if (command === "ls") {
     `you@ship:~$ ${command}`,
     "/" + currentPath.join("/"),
   ]);
-} else if (command === "clear") {
+} 
+else if (command.startsWith("cd ")) {
+  const destination = command.slice(3).trim();
+
+  if (destination === "..") {
+    const newPath = currentPath.slice(0, -1);
+    setCurrentPath(newPath);
+  } else {
+    const newPath = [...currentPath, destination];
+
+    if (isDirectory(newPath)) {
+      setCurrentPath(newPath);
+    }
+  }
+}
+
+else if (command === "cd") {
+  setCurrentPath(["home", "you"]);
+}
+
+
+else if (command === "clear") {
   setOutput([]);
 } else if (command !== "") {
   setOutput((previousOutput) => [
@@ -54,6 +75,13 @@ console.log(newPath);
     setInput("");
   };
 console.log(filesystem);
+
+const promptPath =
+  currentPath.length === 2 &&
+  currentPath[0] === "home" &&
+  currentPath[1] === "you"
+    ? "~"
+    : "/" + currentPath.join("/");
   return (
     <main className="terminal">
       <h1>TREASURE.SYS</h1>
@@ -69,7 +97,7 @@ console.log(filesystem);
       </div>
 
       <div className="prompt">
-        <span>you@ship:~$</span>
+       <span>you@ship:{promptPath}$</span>
 
         <input
           value={input}
